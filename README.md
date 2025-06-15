@@ -1,1 +1,1 @@
-echo # 482proje
+# 482proje
