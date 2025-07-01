@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+const LOCAL_KEY = 'fikirler';
 
 export default function Home() {
   // Başlangıç fikirleri
-  const [fikirler, setFikirler] = useState([
+  const defaultFikirler = [
     '482 dersini AA geçmek',
     'Proje Ödevini yapmak',
     'Ekip içi dağılımı planlamak'
-  ]);
+  ];
+  const [fikirler, setFikirler] = useState<string[]>([]);
   const [yeniFikir, setYeniFikir] = useState('');
   const [duzenleIndex, setDuzenleIndex] = useState<number | null>(null);
+
+  // İlk açılışta localStorage'dan yükle
+  useEffect(() => {
+    const kayitli = localStorage.getItem(LOCAL_KEY);
+    if (kayitli) {
+      setFikirler(JSON.parse(kayitli));
+    } else {
+      setFikirler(defaultFikirler);
+    }
+  }, []);
+
+  // Fikirler değiştikçe localStorage'a kaydet
+  useEffect(() => {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(fikirler));
+  }, [fikirler]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
