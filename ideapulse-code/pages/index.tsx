@@ -16,6 +16,10 @@ export default function Home() {
     setYeniFikir('');
   };
 
+  const handleDelete = (index: number) => {
+    setFikirler(fikirler.filter((_, i) => i !== index));
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       <h1>Hoş geldiniz!</h1>
@@ -38,7 +42,12 @@ export default function Home() {
         <h2 style={{ fontSize: 20, marginBottom: 12 }}>Fikirleriniz</h2>
         <ul style={{ listStyle: 'disc', paddingLeft: 24 }}>
           {fikirler.map((fikir, i) => (
-            <li key={i} style={{ marginBottom: 8, fontSize: 16 }}>{fikir}</li>
+            <li key={i} style={{ marginBottom: 8, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span>{fikir}</span>
+              <button onClick={() => handleDelete(i)} style={{ marginLeft: 12, color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14 }}>
+                Sil
+              </button>
+            </li>
           ))}
         </ul>
       </div>
