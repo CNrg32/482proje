@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function Home() {
-  // Statik örnek fikirler
-  const fikirler = [
+  // Başlangıç fikirleri
+  const [fikirler, setFikirler] = useState([
     '482 dersini AA geçmek',
     'Proje Ödevini yapmak',
     'Ekip içi dağılımı planlamak'
-  ];
+  ]);
+  const [yeniFikir, setYeniFikir] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!yeniFikir.trim()) return;
+    setFikirler([yeniFikir, ...fikirler]);
+    setYeniFikir('');
+  };
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -14,6 +22,18 @@ export default function Home() {
       <p style={{ marginTop: 16, fontSize: 18 }}>
         Bu uygulama ile fikirlerinizi kolayca ekleyebilir ve yönetebilirsiniz.
       </p>
+      <form onSubmit={handleSubmit} style={{ marginTop: 32, width: 350, display: 'flex', gap: 8 }}>
+        <input
+          type="text"
+          placeholder="Yeni fikrinizi yazın..."
+          value={yeniFikir}
+          onChange={e => setYeniFikir(e.target.value)}
+          style={{ flex: 1, padding: 8, fontSize: 16 }}
+        />
+        <button type="submit" style={{ padding: '8px 16px', fontSize: 16 }}>
+          Ekle
+        </button>
+      </form>
       <div style={{ marginTop: 32, width: 350 }}>
         <h2 style={{ fontSize: 20, marginBottom: 12 }}>Fikirleriniz</h2>
         <ul style={{ listStyle: 'disc', paddingLeft: 24 }}>
