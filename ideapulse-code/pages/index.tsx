@@ -8,16 +8,36 @@ export default function Home() {
     'Ekip içi dağılımı planlamak'
   ]);
   const [yeniFikir, setYeniFikir] = useState('');
+  const [duzenleIndex, setDuzenleIndex] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!yeniFikir.trim()) return;
-    setFikirler([yeniFikir, ...fikirler]);
+    if (duzenleIndex !== null) {
+      // Düzenleme modunda
+      const yeniFikirler = [...fikirler];
+      yeniFikirler[duzenleIndex] = yeniFikir;
+      setFikirler(yeniFikirler);
+      setDuzenleIndex(null);
+    } else {
+      // Yeni fikir ekle
+      setFikirler([yeniFikir, ...fikirler]);
+    }
     setYeniFikir('');
   };
 
   const handleDelete = (index: number) => {
     setFikirler(fikirler.filter((_, i) => i !== index));
+    // Eğer silinen fikir düzenleniyorsa, düzenleme modunu kapat
+    if (duzenleIndex === index) {
+      setDuzenleIndex(null);
+      setYeniFikir('');
+    }
+  };
+
+  const handleEdit = (index: number) => {
+    setDuzenleIndex(index);
+    setYeniFikir(fikirler[index]);
   };
 
   return (
@@ -35,8 +55,13 @@ export default function Home() {
           style={{ flex: 1, padding: 8, fontSize: 16 }}
         />
         <button type="submit" style={{ padding: '8px 16px', fontSize: 16 }}>
-          Ekle
+          {duzenleIndex !== null ? 'Kaydet' : 'Ekle'}
         </button>
+        {duzenleIndex !== null && (
+          <button type="button" onClick={() => { setDuzenleIndex(null); setYeniFikir(''); }} style={{ padding: '8px 12px', fontSize: 16 }}>
+            İptal
+          </button>
+        )}
       </form>
       <div style={{ marginTop: 32, width: 350 }}>
         <h2 style={{ fontSize: 20, marginBottom: 12 }}>Fikirleriniz</h2>
@@ -44,9 +69,14 @@ export default function Home() {
           {fikirler.map((fikir, i) => (
             <li key={i} style={{ marginBottom: 8, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span>{fikir}</span>
-              <button onClick={() => handleDelete(i)} style={{ marginLeft: 12, color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14 }}>
-                Sil
-              </button>
+              <div>
+                <button onClick={() => handleEdit(i)} style={{ marginRight: 8, color: 'blue', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14 }}>
+                  Düzenle
+                </button>
+                <button onClick={() => handleDelete(i)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer', fontSize: 14 }}>
+                  Sil
+                </button>
+              </div>
             </li>
           ))}
         </ul>
