@@ -1,0 +1,53 @@
+{
+  "name": "IdeaPulse - Fikir Yönetimi",
+  "short_name": "IdeaPulse",
+  "description": "Fikirlerinizi kolayca organize edin ve yönetin",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Yeni Fikir Ekle",
+      "short_name": "Yeni Fikir",
+      "description": "Hızlıca yeni bir fikir ekleyin",
+      "url": "/?tab=add",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "İstatistikler",
+      "short_name": "İstatistikler", 
+      "description": "Fikir istatistiklerinizi görüntüleyin",
+      "url": "/?tab=stats",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+} 

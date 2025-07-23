@@ -1,23 +1,4 @@
-# ideanew
+# IdeaPulse 
+by Aylin Şahin, Halil Melih Akça, Mustafa Çevik and Alp Tolga Toksöz.
 
-Bu proje, Next.js ile oluşturulmuş basit bir fikir ekleme uygulamasının temel halidir.
-
-## Kurulum
-
-Öncelikle bağımlılıkları yükleyin:
-
-```
-npm install
-```
-
-## Geliştirme Sunucusunu Başlatma
-
-```
-npm run dev
-```
-
-Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresini açarak uygulamayı görebilirsiniz.
-
-## İlk Ekran
-
-Projeyi ilk başlattığınızda ekranda sadece "Hello World" yazısı gözükecektir. 
+Hocam documents dosyasının altında Assignment 2 için gerekli bütün belgeleri bulabilirsiniz. TASK_MATRIX.md Sofware_Design_Documeent.pdf'in yazım sürecindeki görev dağılımını, GENERAL_TASK_MATRIX.md ise bu task için genel yük dağılımını gösterir.
