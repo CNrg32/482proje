@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import IdeaInput from '@/components/IdeaInput';
 import IdeaList from '@/components/IdeaList';
+import Stats from '@/components/Stats';
 
 export default function Home() {
   const [fikirler, setFikirler] = useState<Fikir[]>([]);
@@ -102,62 +103,46 @@ export default function Home() {
         <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
         {/* İçerik */}
         <main className="flex-1 flex justify-center items-start py-10 px-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md transition-colors duration-200">
-            {activeTab === 'all' && (
-              <>
-                <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
-                  Fikirleriniz
-                </h1>
-                <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
-                  Kaydettiğiniz fikirleri görüntüleyin ve yönetin.
-                </p>
-                
-                <IdeaList 
-                  fikirler={fikirler}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              </>
-            )}
-            
-            {activeTab === 'add' && (
-              <>
-                <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
-                  Yeni Fikir
-                </h1>
-                <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
-                  Yeni bir fikir ekleyin veya mevcut fikri düzenleyin.
-                </p>
-                
-                <IdeaInput 
-                  onSubmit={handleSubmit}
-                  editingFikir={duzenleId !== null ? fikirler.find(f => f.id === duzenleId) : null}
-                  editingIndex={duzenleId !== null ? 0 : null} // Legacy prop for backward compatibility
-                  onCancelEdit={handleCancelEdit}
-                />
-              </>
-            )}
-            
-            {activeTab === 'stats' && (
-              <>
-                <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
-                  İstatistikler
-                </h1>
-                <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
-                  Fikir toplama alışkanlıklarınızı görün.
-                </p>
-                
-                <div className="text-center py-8">
-                  <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                    {fikirler.length}
-                  </div>
-                  <div className="text-gray-600 dark:text-gray-400">
-                    Toplam Fikir
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          {activeTab === 'stats' ? (
+            <Stats fikirler={fikirler} />
+          ) : (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md transition-colors duration-200">
+              {activeTab === 'all' && (
+                <>
+                  <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
+                    Fikirleriniz
+                  </h1>
+                  <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
+                    Kaydettiğiniz fikirleri görüntüleyin ve yönetin.
+                  </p>
+                  
+                  <IdeaList 
+                    fikirler={fikirler}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                </>
+              )}
+              
+              {activeTab === 'add' && (
+                <>
+                  <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
+                    Yeni Fikir
+                  </h1>
+                  <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
+                    Yeni bir fikir ekleyin veya mevcut fikri düzenleyin.
+                  </p>
+                  
+                  <IdeaInput 
+                    onSubmit={handleSubmit}
+                    editingFikir={duzenleId !== null ? fikirler.find(f => f.id === duzenleId) : null}
+                    editingIndex={duzenleId !== null ? 0 : null} // Legacy prop for backward compatibility
+                    onCancelEdit={handleCancelEdit}
+                  />
+                </>
+              )}
+            </div>
+          )}
         </main>
       </div>
     </div>
