@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Fikir } from '@/types/idea';
-
-const LOCAL_KEY = 'fikirler';
+import { saveIdeasToStorage, getIdeasFromStorage, getDefaultIdeas } from '@/utils/storage';
 
 export default function Home() {
-  // Başlangıç fikirleri
-  const defaultFikirler: Fikir[] = [
-    { metin: '482 dersini AA geçmek', etiket: 'okul' },
-    { metin: 'Proje Ödevini yapmak', etiket: 'ödev' },
-    { metin: 'Ekip içi dağılımı planlamak', etiket: 'takım' }
-  ];
   const [fikirler, setFikirler] = useState<Fikir[]>([]);
   const [yeniFikir, setYeniFikir] = useState('');
   const [yeniEtiket, setYeniEtiket] = useState('');
@@ -17,17 +10,19 @@ export default function Home() {
 
   // İlk açılışta localStorage'dan yükle
   useEffect(() => {
-    const kayitli = localStorage.getItem(LOCAL_KEY);
-    if (kayitli) {
-      setFikirler(JSON.parse(kayitli));
+    const storedIdeas = getIdeasFromStorage();
+    if (storedIdeas.length > 0) {
+      setFikirler(storedIdeas);
     } else {
-      setFikirler(defaultFikirler);
+      setFikirler(getDefaultIdeas());
     }
   }, []);
 
   // Fikirler değiştikçe localStorage'a kaydet
   useEffect(() => {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(fikirler));
+    if (fikirler.length > 0) {
+      saveIdeasToStorage(fikirler);
+    }
   }, [fikirler]);
 
   const handleSubmit = (e: React.FormEvent) => {
