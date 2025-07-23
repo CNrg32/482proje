@@ -3,6 +3,7 @@
 export interface Idea {
   id: string;
   content: string;
+  mood: 'inspired' | 'neutral' | 'tired' | 'excited';
   tags: string[];
   timestamp: string; // ISO format
 }
@@ -11,6 +12,7 @@ export interface Idea {
 export type Fikir = {
   metin: string;
   etiket?: string;
+  mood?: 'inspired' | 'neutral' | 'tired' | 'excited';
 };
 
 // Helper function to convert Fikir to Idea
@@ -18,6 +20,7 @@ export const fikirToIdea = (fikir: Fikir): Idea => {
   return {
     id: '', // Will be set by caller
     content: fikir.metin,
+    mood: fikir.mood || 'neutral',
     tags: fikir.etiket ? [fikir.etiket] : [],
     timestamp: new Date().toISOString()
   };
@@ -27,6 +30,7 @@ export const fikirToIdea = (fikir: Fikir): Idea => {
 export const ideaToFikir = (idea: Idea): Fikir => {
   return {
     metin: idea.content,
-    etiket: idea.tags.length > 0 ? idea.tags[0] : undefined
+    etiket: idea.tags.length > 0 ? idea.tags[0] : undefined,
+    mood: idea.mood as Fikir['mood']
   };
 }; 

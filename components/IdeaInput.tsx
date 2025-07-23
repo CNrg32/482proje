@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Fikir } from '@/types/idea';
+import MoodSelector from './MoodSelector';
 
 interface Props {
   onSubmit: (fikir: Fikir) => void;
@@ -18,29 +19,33 @@ const IdeaInput: React.FC<Props> = ({
 }) => {
   const [yeniFikir, setYeniFikir] = useState(editingFikir?.metin || '');
   const [yeniEtiket, setYeniEtiket] = useState(editingFikir?.etiket || '');
+  const [mood, setMood] = useState<Fikir['mood']>(editingFikir?.mood || 'neutral');
 
   // Editing mode değiştiğinde input'ları güncelle
   React.useEffect(() => {
     setYeniFikir(editingFikir?.metin || '');
     setYeniEtiket(editingFikir?.etiket || '');
+    setMood(editingFikir?.mood || 'neutral');
   }, [editingFikir]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!yeniFikir.trim()) return;
     
-    onSubmit({ metin: yeniFikir, etiket: yeniEtiket });
+    onSubmit({ metin: yeniFikir, etiket: yeniEtiket, mood });
     
     // Form'u temizle (sadece yeni ekleme modunda)
     if (editingIndex === null) {
       setYeniFikir('');
       setYeniEtiket('');
+      setMood('neutral');
     }
   };
 
   const handleCancel = () => {
     setYeniFikir('');
     setYeniEtiket('');
+    setMood('neutral');
     if (onCancelEdit) {
       onCancelEdit();
     }
@@ -71,6 +76,9 @@ const IdeaInput: React.FC<Props> = ({
                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
                  transition-colors duration-200"
       />
+      
+      <MoodSelector value={mood} onChange={setMood} />
+      
       <div className="flex gap-2">
         <button 
           type="submit" 

@@ -17,7 +17,14 @@ export const getIdeasFromStorage = (): Fikir[] => {
   try {
     if (typeof window === 'undefined') return [];
     const stored = localStorage.getItem(LOCAL_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    
+    const ideas = JSON.parse(stored);
+    // Eski fikirler için mood ekle (backward compatibility)
+    return ideas.map((idea: any) => ({
+      ...idea,
+      mood: idea.mood || 'neutral'
+    }));
   } catch (error) {
     console.error('Fikirler yüklenirken hata oluştu:', error);
     return [];
@@ -26,7 +33,7 @@ export const getIdeasFromStorage = (): Fikir[] => {
 
 // Varsayılan fikirler
 export const getDefaultIdeas = (): Fikir[] => [
-  { metin: '482 dersini AA geçmek', etiket: 'okul' },
-  { metin: 'Proje Ödevini yapmak', etiket: 'ödev' },
-  { metin: 'Ekip içi dağılımı planlamak', etiket: 'takım' }
+  { metin: '482 dersini AA geçmek', etiket: 'okul', mood: 'excited' },
+  { metin: 'Proje Ödevini yapmak', etiket: 'ödev', mood: 'neutral' },
+  { metin: 'Ekip içi dağılımı planlamak', etiket: 'takım', mood: 'inspired' }
 ]; 

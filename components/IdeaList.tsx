@@ -10,6 +10,17 @@ interface Props {
 }
 
 const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
+  // Ruh haline göre emoji gösterilmesi
+  const getMoodEmoji = (mood?: Fikir['mood']) => {
+    switch (mood) {
+      case 'inspired': return '✨';
+      case 'excited': return '🔥';
+      case 'neutral': return '😐';
+      case 'tired': return '😴';
+      default: return '😐';
+    }
+  };
+
   if (fikirler.length === 0) {
     return (
       <div className="text-center py-8">
@@ -36,6 +47,7 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
             <p className="text-gray-800 dark:text-gray-100 flex-1 pr-4 whitespace-pre-line">
               {fikir.metin}
             </p>
+            <span className="text-xl ml-2 flex-shrink-0">{getMoodEmoji(fikir.mood)}</span>
           </div>
           
           <div className="flex justify-between items-center">
