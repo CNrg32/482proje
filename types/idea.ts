@@ -10,9 +10,11 @@ export interface Idea {
 
 // Şimdilik eski Fikir tipini de destekleyeceğiz (backward compatibility için)
 export type Fikir = {
+  id?: string; // UUID support eklendi
   metin: string;
   etiket?: string;
   mood?: 'inspired' | 'neutral' | 'tired' | 'excited';
+  timestamp?: string; // ISO format timestamp eklendi
 };
 
 // Helper function to convert Fikir to Idea

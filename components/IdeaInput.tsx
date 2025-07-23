@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Fikir } from '@/types/idea';
 import MoodSelector from './MoodSelector';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
   onSubmit: (fikir: Fikir) => void;
@@ -32,7 +33,15 @@ const IdeaInput: React.FC<Props> = ({
     e.preventDefault();
     if (!yeniFikir.trim()) return;
     
-    onSubmit({ metin: yeniFikir, etiket: yeniEtiket, mood });
+    const fikir: Fikir = {
+      id: editingFikir?.id || uuidv4(), // Düzenleme modunda ID'yi koru, yoksa yeni oluştur
+      metin: yeniFikir,
+      etiket: yeniEtiket,
+      mood,
+      timestamp: editingIndex !== null ? editingFikir?.timestamp : new Date().toISOString()
+    };
+    
+    onSubmit(fikir);
     
     // Form'u temizle (sadece yeni ekleme modunda)
     if (editingIndex === null) {

@@ -5,8 +5,8 @@ import { Fikir } from '@/types/idea';
 
 interface Props {
   fikirler: Fikir[];
-  onEdit: (index: number) => void;
-  onDelete: (index: number) => void;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
@@ -37,9 +37,9 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
 
   return (
     <div className="space-y-4">
-      {fikirler.map((fikir, i) => (
+      {fikirler.map((fikir) => (
         <div 
-          key={i} 
+          key={fikir.id || Math.random()} 
           className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600
                    hover:shadow-md transition-all duration-200"
         >
@@ -51,7 +51,7 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
           </div>
           
           <div className="flex justify-between items-center">
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 items-center">
               {fikir.etiket && (
                 <span className="inline-block px-2 py-1 text-xs font-medium
                                bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 
@@ -59,11 +59,16 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
                   #{fikir.etiket}
                 </span>
               )}
+              {fikir.timestamp && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  {new Date(fikir.timestamp).toLocaleString('tr-TR')}
+                </span>
+              )}
             </div>
             
             <div className="flex space-x-2">
               <button 
-                onClick={() => onEdit(i)} 
+                onClick={() => onEdit(fikir.id!)} 
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300
                          text-sm font-medium transition-colors duration-200
                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
@@ -72,7 +77,7 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
                 Düzenle
               </button>
               <button 
-                onClick={() => onDelete(i)} 
+                onClick={() => onDelete(fikir.id!)} 
                 className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300
                          text-sm font-medium transition-colors duration-200
                          focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2

@@ -20,10 +20,12 @@ export const getIdeasFromStorage = (): Fikir[] => {
     if (!stored) return [];
     
     const ideas = JSON.parse(stored);
-    // Eski fikirler için mood ekle (backward compatibility)
+    // Backward compatibility: eski fikirlere ID, mood ve timestamp ekle
     return ideas.map((idea: any) => ({
       ...idea,
-      mood: idea.mood || 'neutral'
+      id: idea.id || generateUniqueId(), // ID yoksa oluştur
+      mood: idea.mood || 'neutral',
+      timestamp: idea.timestamp || new Date().toISOString()
     }));
   } catch (error) {
     console.error('Fikirler yüklenirken hata oluştu:', error);
@@ -31,9 +33,32 @@ export const getIdeasFromStorage = (): Fikir[] => {
   }
 };
 
+// Unique ID generator (basit UUID benzeri)
+const generateUniqueId = (): string => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+};
+
 // Varsayılan fikirler
 export const getDefaultIdeas = (): Fikir[] => [
-  { metin: '482 dersini AA geçmek', etiket: 'okul', mood: 'excited' },
-  { metin: 'Proje Ödevini yapmak', etiket: 'ödev', mood: 'neutral' },
-  { metin: 'Ekip içi dağılımı planlamak', etiket: 'takım', mood: 'inspired' }
+  { 
+    id: generateUniqueId(),
+    metin: '482 dersini AA geçmek', 
+    etiket: 'okul', 
+    mood: 'excited',
+    timestamp: new Date().toISOString()
+  },
+  { 
+    id: generateUniqueId(),
+    metin: 'Proje Ödevini yapmak', 
+    etiket: 'ödev', 
+    mood: 'neutral',
+    timestamp: new Date().toISOString()
+  },
+  { 
+    id: generateUniqueId(),
+    metin: 'Ekip içi dağılımı planlamak', 
+    etiket: 'takım', 
+    mood: 'inspired',
+    timestamp: new Date().toISOString()
+  }
 ]; 

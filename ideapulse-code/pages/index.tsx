@@ -8,7 +8,7 @@ import IdeaList from '@/components/IdeaList';
 
 export default function Home() {
   const [fikirler, setFikirler] = useState<Fikir[]>([]);
-  const [duzenleIndex, setDuzenleIndex] = useState<number | null>(null);
+  const [duzenleId, setDuzenleId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('all');
 
@@ -55,31 +55,35 @@ export default function Home() {
   }, [fikirler]);
 
   const handleSubmit = (fikir: Fikir) => {
-    if (duzenleIndex !== null) {
+    if (duzenleId !== null) {
       // Düzenleme modunda
-      const yeniFikirler = [...fikirler];
-      yeniFikirler[duzenleIndex] = fikir;
-      setFikirler(yeniFikirler);
-      setDuzenleIndex(null);
+      const updated = fikirler.map(f => 
+        f.id === duzenleId ? { ...fikir, timestamp: new Date().toISOString() } : f
+      );
+      setFikirler(updated);
+      setDuzenleId(null);
+      setActiveTab('all'); // Düzenleme sonrası listeye dön
     } else {
       // Yeni fikir ekle
       setFikirler([fikir, ...fikirler]);
+      setActiveTab('all'); // Ekleme sonrası listeye dön
     }
   };
 
-  const handleDelete = (index: number) => {
-    setFikirler(fikirler.filter((_, i) => i !== index));
-    if (duzenleIndex === index) {
-      setDuzenleIndex(null);
+  const handleDelete = (id: string) => {
+    setFikirler(fikirler.filter(f => f.id !== id));
+    if (duzenleId === id) {
+      setDuzenleId(null);
     }
   };
 
-  const handleEdit = (index: number) => {
-    setDuzenleIndex(index);
+  const handleEdit = (id: string) => {
+    setDuzenleId(id);
+    setActiveTab('add'); // Düzenleme için form sekmesine git
   };
 
   const handleCancelEdit = () => {
-    setDuzenleIndex(null);
+    setDuzenleId(null);
   };
 
   const toggleTheme = () => {
@@ -127,8 +131,8 @@ export default function Home() {
                 
                 <IdeaInput 
                   onSubmit={handleSubmit}
-                  editingFikir={duzenleIndex !== null ? fikirler[duzenleIndex] : null}
-                  editingIndex={duzenleIndex}
+                  editingFikir={duzenleId !== null ? fikirler.find(f => f.id === duzenleId) : null}
+                  editingIndex={duzenleId !== null ? 0 : null} // Legacy prop for backward compatibility
                   onCancelEdit={handleCancelEdit}
                 />
               </>
