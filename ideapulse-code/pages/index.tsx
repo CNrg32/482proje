@@ -9,7 +9,6 @@ import Stats from '@/components/Stats';
 
 export default function Home() {
   const [fikirler, setFikirler] = useState<Fikir[]>([]);
-  const [duzenleId, setDuzenleId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string | null>(null);
@@ -82,35 +81,21 @@ export default function Home() {
   }, [fikirler]);
 
   const handleSubmit = (fikir: Fikir) => {
-    if (duzenleId !== null) {
-      // Düzenleme modunda
-      const updated = fikirler.map(f => 
-        f.id === duzenleId ? { ...fikir, timestamp: new Date().toISOString() } : f
-      );
-      setFikirler(updated);
-      setDuzenleId(null);
-      setActiveTab('all'); // Düzenleme sonrası listeye dön
-    } else {
-      // Yeni fikir ekle
-      setFikirler([fikir, ...fikirler]);
-      setActiveTab('all'); // Ekleme sonrası listeye dön
-    }
+    // Yeni fikir ekle (artık düzenleme in-place yapılıyor)
+    setFikirler([fikir, ...fikirler]);
+    setActiveTab('all'); // Ekleme sonrası listeye dön
   };
 
   const handleDelete = (id: string) => {
     setFikirler(fikirler.filter(f => f.id !== id));
-    if (duzenleId === id) {
-      setDuzenleId(null);
-    }
   };
 
-  const handleEdit = (id: string) => {
-    setDuzenleId(id);
-    setActiveTab('add'); // Düzenleme için form sekmesine git
-  };
-
-  const handleCancelEdit = () => {
-    setDuzenleId(null);
+  const handleEdit = (updatedFikir: Fikir) => {
+    // In-place editing ile direkt güncelle
+    const updated = fikirler.map(f => 
+      f.id === updatedFikir.id ? updatedFikir : f
+    );
+    setFikirler(updated);
   };
 
   const toggleTheme = () => {
@@ -285,9 +270,9 @@ export default function Home() {
                   
                   <IdeaInput 
                     onSubmit={handleSubmit}
-                    editingFikir={duzenleId !== null ? fikirler.find(f => f.id === duzenleId) : null}
-                    editingIndex={duzenleId !== null ? 0 : null} // Legacy prop for backward compatibility
-                    onCancelEdit={handleCancelEdit}
+                    editingFikir={null} // Artık in-place editing kullanıyoruz
+                    editingIndex={null} // Legacy prop
+                    onCancelEdit={() => {}} // No-op function
                   />
                 </>
               )}
