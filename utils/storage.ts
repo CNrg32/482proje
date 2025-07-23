@@ -20,13 +20,23 @@ export const getIdeasFromStorage = (): Fikir[] => {
     if (!stored) return [];
     
     const ideas = JSON.parse(stored);
-    // Backward compatibility: eski fikirlere ID, mood ve timestamp ekle
-    return ideas.map((idea: any) => ({
-      ...idea,
-      id: idea.id || generateUniqueId(), // ID yoksa oluştur
-      mood: idea.mood || 'neutral',
-      timestamp: idea.timestamp || new Date().toISOString()
-    }));
+          // Backward compatibility: eski fikirlere ID, mood, timestamp ve çoklu etiketler ekle
+      return ideas.map((idea: any) => {
+        const updatedIdea = {
+          ...idea,
+          id: idea.id || generateUniqueId(), // ID yoksa oluştur
+          mood: idea.mood || 'neutral',
+          timestamp: idea.timestamp || new Date().toISOString()
+        };
+
+        // Çoklu etiket sistemi migration
+        if (!updatedIdea.etiketler && updatedIdea.etiket) {
+          // Tek etiket varsa, etiketler array'ine çevir
+          updatedIdea.etiketler = [updatedIdea.etiket];
+        }
+
+        return updatedIdea;
+      });
   } catch (error) {
     console.error('Fikirler yüklenirken hata oluştu:', error);
     return [];

@@ -19,13 +19,19 @@ const IdeaInput: React.FC<Props> = ({
   onCancelEdit 
 }) => {
   const [yeniFikir, setYeniFikir] = useState(editingFikir?.metin || '');
-  const [yeniEtiket, setYeniEtiket] = useState(editingFikir?.etiket || '');
+  const [yeniEtiketler, setYeniEtiketler] = useState(
+    editingFikir?.etiketler ? editingFikir.etiketler.join(', ') : 
+    editingFikir?.etiket ? editingFikir.etiket : ''
+  );
   const [mood, setMood] = useState<Fikir['mood']>(editingFikir?.mood || 'neutral');
 
   // Editing mode değiştiğinde input'ları güncelle
   React.useEffect(() => {
     setYeniFikir(editingFikir?.metin || '');
-    setYeniEtiket(editingFikir?.etiket || '');
+    setYeniEtiketler(
+      editingFikir?.etiketler ? editingFikir.etiketler.join(', ') : 
+      editingFikir?.etiket ? editingFikir.etiket : ''
+    );
     setMood(editingFikir?.mood || 'neutral');
   }, [editingFikir]);
 
@@ -33,10 +39,17 @@ const IdeaInput: React.FC<Props> = ({
     e.preventDefault();
     if (!yeniFikir.trim()) return;
     
+    // Etiketleri array'e çevir
+    const etiketlerArray = yeniEtiketler
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+    
     const fikir: Fikir = {
       id: editingFikir?.id || uuidv4(), // Düzenleme modunda ID'yi koru, yoksa yeni oluştur
       metin: yeniFikir,
-      etiket: yeniEtiket,
+      etiketler: etiketlerArray, // Çoklu etiketler
+      etiket: etiketlerArray[0] || undefined, // Backward compatibility için ilk etiket
       mood,
       timestamp: editingIndex !== null ? editingFikir?.timestamp : new Date().toISOString()
     };
@@ -46,14 +59,14 @@ const IdeaInput: React.FC<Props> = ({
     // Form'u temizle (sadece yeni ekleme modunda)
     if (editingIndex === null) {
       setYeniFikir('');
-      setYeniEtiket('');
+      setYeniEtiketler('');
       setMood('neutral');
     }
   };
 
   const handleCancel = () => {
     setYeniFikir('');
-    setYeniEtiket('');
+    setYeniEtiketler('');
     setMood('neutral');
     if (onCancelEdit) {
       onCancelEdit();
@@ -77,9 +90,9 @@ const IdeaInput: React.FC<Props> = ({
       />
       <input
         type="text"
-        placeholder="Etiket (isteğe bağlı)"
-        value={yeniEtiket}
-        onChange={e => setYeniEtiket(e.target.value)}
+        placeholder="Etiketler (virgülle ayırın)"
+        value={yeniEtiketler}
+        onChange={e => setYeniEtiketler(e.target.value)}
         className="w-full p-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 
                  bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
                  focus:ring-2 focus:ring-blue-500 focus:border-transparent

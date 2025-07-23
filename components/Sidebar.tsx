@@ -31,16 +31,25 @@ const Sidebar: React.FC<Props> = ({
     { id: 'stats', label: 'İstatistikler', icon: '📊' }
   ];
 
-  // Tüm etiketleri topla ve sayılarını bul
+    // Tüm etiketleri topla ve sayılarını bul
   const getTagsWithCount = () => {
     const tagCount: Record<string, number> = {};
-    
+
     fikirler.forEach(fikir => {
-      if (fikir.etiket && fikir.etiket.trim()) {
+      // Çoklu etiketleri kontrol et
+      if (fikir.etiketler && fikir.etiketler.length > 0) {
+        fikir.etiketler.forEach(tag => {
+          if (tag.trim()) {
+            tagCount[tag] = (tagCount[tag] || 0) + 1;
+          }
+        });
+      } 
+      // Fallback: tek etiket sistemi (backward compatibility)
+      else if (fikir.etiket && fikir.etiket.trim()) {
         tagCount[fikir.etiket] = (tagCount[fikir.etiket] || 0) + 1;
       }
     });
-    
+
     return Object.entries(tagCount)
       .sort((a, b) => b[1] - a[1]) // Sık kullanılana göre sırala
       .slice(0, 8); // En fazla 8 etiket

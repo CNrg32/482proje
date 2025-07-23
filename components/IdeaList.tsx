@@ -32,16 +32,26 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete, onTagClick }) =
   const startEditing = (fikir: Fikir) => {
     setEditingId(fikir.id!);
     setEditContent(fikir.metin);
-    setEditTags(fikir.etiket || '');
+    setEditTags(
+      fikir.etiketler ? fikir.etiketler.join(', ') : 
+      fikir.etiket ? fikir.etiket : ''
+    );
     setEditMood(fikir.mood || 'neutral');
   };
 
   // Düzenlemeyi kaydet
   const saveEdit = (fikir: Fikir) => {
+    // Etiketleri array'e çevir
+    const etiketlerArray = editTags
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
     const updatedFikir: Fikir = {
       ...fikir,
       metin: editContent,
-      etiket: editTags,
+      etiketler: etiketlerArray, // Çoklu etiketler
+      etiket: etiketlerArray[0] || undefined, // Backward compatibility için ilk etiket
       mood: editMood,
       timestamp: new Date().toISOString() // Düzenleme zamanını güncelle
     };
@@ -98,7 +108,7 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete, onTagClick }) =
                          bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                          focus:ring-2 focus:ring-blue-500 focus:border-transparent
                          transition-colors duration-200"
-                placeholder="Etiket (isteğe bağlı)"
+                placeholder="Etiketler (virgülle ayırın)"
                 value={editTags}
                 onChange={(e) => setEditTags(e.target.value)}
               />
@@ -138,7 +148,21 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete, onTagClick }) =
               
               <div className="flex justify-between items-center">
                 <div className="flex flex-wrap gap-1 items-center">
-                  {fikir.etiket && (
+                  {/* Çoklu etiketler veya tek etiket göster */}
+                  {(fikir.etiketler && fikir.etiketler.length > 0) ? (
+                    fikir.etiketler.map((tag, index) => (
+                      <button
+                        key={index}
+                        onClick={() => onTagClick?.(tag)}
+                        className="inline-block px-2 py-1 text-xs font-medium
+                                 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 
+                                 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800
+                                 transition-colors duration-200 cursor-pointer"
+                      >
+                        #{tag}
+                      </button>
+                    ))
+                  ) : fikir.etiket && (
                     <button
                       onClick={() => onTagClick?.(fikir.etiket!)}
                       className="inline-block px-2 py-1 text-xs font-medium

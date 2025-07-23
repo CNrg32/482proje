@@ -124,9 +124,16 @@ export default function Home() {
     let filtered = fikirler;
     
     if (filterTag) {
-      filtered = filtered.filter(fikir => 
-        fikir.etiket && fikir.etiket.toLowerCase() === filterTag.toLowerCase()
-      );
+      filtered = filtered.filter(fikir => {
+        // Çoklu etiketleri kontrol et
+        if (fikir.etiketler && fikir.etiketler.length > 0) {
+          return fikir.etiketler.some(tag => 
+            tag.toLowerCase() === filterTag.toLowerCase()
+          );
+        }
+        // Backward compatibility: tek etiket sistemi
+        return fikir.etiket && fikir.etiket.toLowerCase() === filterTag.toLowerCase();
+      });
     }
     
     if (filterMood) {

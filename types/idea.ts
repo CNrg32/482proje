@@ -12,7 +12,8 @@ export interface Idea {
 export type Fikir = {
   id?: string; // UUID support eklendi
   metin: string;
-  etiket?: string;
+  etiket?: string; // Tek etiket (backward compatibility)
+  etiketler?: string[]; // Çoklu etiketler (yeni sistem)
   mood?: 'inspired' | 'neutral' | 'tired' | 'excited';
   timestamp?: string; // ISO format timestamp eklendi
 };
