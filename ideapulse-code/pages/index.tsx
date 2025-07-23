@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import IdeaInput from '@/components/IdeaInput';
 import IdeaList from '@/components/IdeaList';
 import Stats from '@/components/Stats';
+import InstallPromptManager from '@/components/InstallPromptManager';
 
 export default function Home() {
   const [fikirler, setFikirler] = useState<Fikir[]>([]);
@@ -36,6 +37,20 @@ export default function Home() {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
       }
+    }
+  }, []);
+
+  // PWA Service Worker Registration
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('[PWA] Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.error('[PWA] Service Worker registration failed:', error);
+        });
     }
   }, []);
 
@@ -287,6 +302,9 @@ export default function Home() {
           )}
         </main>
       </div>
+      
+      {/* PWA Install Prompt */}
+      <InstallPromptManager />
     </div>
   );
 } 

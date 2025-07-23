@@ -50,25 +50,55 @@ const generateUniqueId = (): string => {
 
 // Varsayılan fikirler
 export const getDefaultIdeas = (): Fikir[] => [
-  { 
+  {
     id: generateUniqueId(),
-    metin: '482 dersini AA geçmek', 
-    etiket: 'okul', 
+    metin: '482 dersini AA geçmek',
+    etiket: 'okul',
     mood: 'excited',
     timestamp: new Date().toISOString()
   },
-  { 
+  {
     id: generateUniqueId(),
-    metin: 'Proje Ödevini yapmak', 
-    etiket: 'ödev', 
+    metin: 'Proje Ödevini yapmak',
+    etiket: 'ödev',
     mood: 'neutral',
     timestamp: new Date().toISOString()
   },
-  { 
+  {
     id: generateUniqueId(),
-    metin: 'Ekip içi dağılımı planlamak', 
-    etiket: 'takım', 
+    metin: 'Ekip içi dağılımı planlamak',
+    etiket: 'takım',
     mood: 'inspired',
     timestamp: new Date().toISOString()
   }
-]; 
+];
+
+// PWA Utility Functions
+export const isOnline = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  return navigator.onLine;
+};
+
+export const isPWA = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  // Check if running as PWA
+  const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  const isIOSPWA = (window.navigator as any).standalone === true;
+  
+  return isStandalone || isIOSPWA;
+};
+
+export const getInstallationStatus = (): 'installed' | 'installable' | 'not-supported' => {
+  if (typeof window === 'undefined') return 'not-supported';
+  
+  if (isPWA()) {
+    return 'installed';
+  }
+  
+  if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
+    return 'installable';
+  }
+  
+  return 'not-supported';
+}; 
