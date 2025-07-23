@@ -49,51 +49,35 @@ const IdeaInput: React.FC<Props> = ({
   const isEditing = editingIndex !== null;
 
   return (
-    <form onSubmit={handleSubmit} style={{ 
-      marginTop: 0, 
-      marginBottom: 28, 
-      display: 'flex', 
-      gap: 8, 
-      flexDirection: 'column' 
-    }}>
-      <input
-        type="text"
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <textarea
         placeholder="Yeni fikrinizi yazın..."
         value={yeniFikir}
         onChange={e => setYeniFikir(e.target.value)}
-        style={{ 
-          padding: 10, 
-          fontSize: 16, 
-          borderRadius: 8, 
-          border: '1px solid #ddd' 
-        }}
+        rows={3}
+        className="w-full p-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 
+                 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                 resize-none transition-colors duration-200"
+        required
       />
       <input
         type="text"
         placeholder="Etiket (isteğe bağlı)"
         value={yeniEtiket}
         onChange={e => setYeniEtiket(e.target.value)}
-        style={{ 
-          padding: 10, 
-          fontSize: 16, 
-          borderRadius: 8, 
-          border: '1px solid #ddd' 
-        }}
+        className="w-full p-3 text-base rounded-lg border border-gray-300 dark:border-gray-600 
+                 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                 transition-colors duration-200"
       />
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div className="flex gap-2">
         <button 
           type="submit" 
-          style={{ 
-            padding: '10px 0', 
-            fontSize: 16, 
-            borderRadius: 8, 
-            background: '#2563eb', 
-            color: '#fff', 
-            border: 'none', 
-            flex: 1, 
-            fontWeight: 600, 
-            cursor: 'pointer' 
-          }}
+          className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+                   text-white font-semibold rounded-lg transition-colors duration-200
+                   focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                   dark:focus:ring-offset-gray-800"
         >
           {isEditing ? 'Kaydet' : 'Ekle'}
         </button>
@@ -101,17 +85,12 @@ const IdeaInput: React.FC<Props> = ({
           <button 
             type="button" 
             onClick={handleCancel}
-            style={{ 
-              padding: '10px 0', 
-              fontSize: 16, 
-              borderRadius: 8, 
-              background: '#e5e7eb', 
-              color: '#222', 
-              border: 'none', 
-              flex: 1, 
-              fontWeight: 600, 
-              cursor: 'pointer' 
-            }}
+            className="flex-1 py-3 px-4 bg-gray-300 hover:bg-gray-400 active:bg-gray-500
+                     dark:bg-gray-600 dark:hover:bg-gray-500 dark:active:bg-gray-400
+                     text-gray-800 dark:text-gray-200 font-semibold rounded-lg 
+                     transition-colors duration-200
+                     focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+                     dark:focus:ring-offset-gray-800"
           >
             İptal
           </button>

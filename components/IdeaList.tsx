@@ -12,81 +12,66 @@ interface Props {
 const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
   if (fikirler.length === 0) {
     return (
-      <div>
-        <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>
-          Fikirleriniz
-        </h2>
-        <p style={{ color: '#666', fontStyle: 'italic' }}>
+      <div className="text-center py-8">
+        <div className="text-gray-400 dark:text-gray-500 text-5xl mb-4">💡</div>
+        <p className="text-gray-500 dark:text-gray-400 italic">
           Henüz fikir eklenmemiş.
+        </p>
+        <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+          İlk fikrinizi eklemek için "Yeni Fikir" sekmesini kullanın.
         </p>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 12 }}>
-        Fikirleriniz
-      </h2>
-      <ul style={{ listStyle: 'disc', paddingLeft: 24, margin: 0 }}>
-        {fikirler.map((fikir, i) => (
-          <li 
-            key={i} 
-            style={{ 
-              marginBottom: 10, 
-              fontSize: 16, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between' 
-            }}
-          >
-            <span>
+    <div className="space-y-4">
+      {fikirler.map((fikir, i) => (
+        <div 
+          key={i} 
+          className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600
+                   hover:shadow-md transition-all duration-200"
+        >
+          <div className="flex justify-between items-start mb-3">
+            <p className="text-gray-800 dark:text-gray-100 flex-1 pr-4 whitespace-pre-line">
               {fikir.metin}
+            </p>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <div className="flex flex-wrap gap-1">
               {fikir.etiket && (
-                <span style={{ 
-                  marginLeft: 8, 
-                  fontSize: 13, 
-                  color: '#2563eb', 
-                  background: '#e0e7ff', 
-                  borderRadius: 8, 
-                  padding: '2px 8px' 
-                }}>
+                <span className="inline-block px-2 py-1 text-xs font-medium
+                               bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 
+                               rounded-full">
                   #{fikir.etiket}
                 </span>
               )}
-            </span>
-            <div>
+            </div>
+            
+            <div className="flex space-x-2">
               <button 
                 onClick={() => onEdit(i)} 
-                style={{ 
-                  marginRight: 8, 
-                  color: '#2563eb', 
-                  border: 'none', 
-                  background: 'none', 
-                  cursor: 'pointer', 
-                  fontSize: 14, 
-                  fontWeight: 600 
-                }}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300
+                         text-sm font-medium transition-colors duration-200
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                         dark:focus:ring-offset-gray-700 rounded px-1"
               >
                 Düzenle
               </button>
               <button 
                 onClick={() => onDelete(i)} 
-                style={{ 
-                  color: '#dc2626', 
-                  border: 'none', 
-                  background: 'none', 
-                  cursor: 'pointer', 
-                  fontSize: 14, 
-                  fontWeight: 600 
-                }}
+                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300
+                         text-sm font-medium transition-colors duration-200
+                         focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                         dark:focus:ring-offset-gray-700 rounded px-1"
               >
                 Sil
               </button>
             </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
