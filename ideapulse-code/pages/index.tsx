@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Fikir } from '@/types/idea';
 
 const LOCAL_KEY = 'fikirler';
-
-type Fikir = {
-  metin: string;
-  etiket?: string;
-};
 
 export default function Home() {
   // Başlangıç fikirleri
