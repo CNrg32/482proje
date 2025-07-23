@@ -10,6 +10,8 @@ interface Props {
   onMoodFilter: (mood: any | null) => void;
   selectedTag: string | null;
   selectedMood: any | null;
+  isMobile?: boolean;
+  onMobileClose?: () => void;
 }
 
 const Sidebar: React.FC<Props> = ({ 
@@ -19,7 +21,9 @@ const Sidebar: React.FC<Props> = ({
   onTagFilter,
   onMoodFilter,
   selectedTag,
-  selectedMood
+  selectedMood,
+  isMobile,
+  onMobileClose
 }) => {
   const menuItems = [
     { id: 'all', label: 'Fikirler', icon: '📝' },
@@ -84,11 +88,24 @@ const Sidebar: React.FC<Props> = ({
   const moodsToShow = getMoodsWithCount();
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-0 min-h-screen shadow-sm">
+    <aside className="w-full h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 lg:border-r-0 overflow-y-auto">
       <div className="p-6">
-        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
-          Menü
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+            Menü
+          </h2>
+          {isMobile && onMobileClose && (
+            <button
+              onClick={onMobileClose}
+              className="lg:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Menüyü kapat"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Fikirlerinizi yönetin
         </p>

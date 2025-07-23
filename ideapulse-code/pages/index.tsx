@@ -14,6 +14,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const [filterMood, setFilterMood] = useState<Fikir['mood'] | null>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
   // İlk açılışta localStorage'dan yükle
   useEffect(() => {
@@ -49,6 +50,29 @@ export default function Home() {
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
+
+  // ESC tuşu ile mobil sidebar'ı kapat ve body scroll'u kontrol et
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMobileSidebarOpen) {
+        setIsMobileSidebarOpen(false);
+      }
+    };
+
+    // Mobil sidebar açıkken body scroll'u engelle
+    if (isMobileSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    document.addEventListener('keydown', handleEscape);
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset'; // Cleanup
+    };
+  }, [isMobileSidebarOpen]);
 
   // Fikirler değiştikçe localStorage'a kaydet
   useEffect(() => {
@@ -95,6 +119,7 @@ export default function Home() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    setIsMobileSidebarOpen(false); // Mobil menüyü kapat
   };
 
   // Etiket filtreleme
@@ -168,19 +193,63 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 flex flex-col">
       <Navbar onThemeToggle={toggleTheme} isDarkMode={isDarkMode} />
+      
+      {/* Mobil menü butonu */}
+      <div className="lg:hidden fixed bottom-4 right-4 z-50">
+        <button 
+          onClick={() => setIsMobileSidebarOpen(prev => !prev)}
+          className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
+          aria-label={isMobileSidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
+        >
+          {isMobileSidebarOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          )}
+        </button>
+      </div>
+      
       {/* Ana içerik alanı */}
       <div className="flex-1 flex">
-        <Sidebar 
-          fikirler={fikirler}
-          activeTab={activeTab} 
-          onTabChange={handleTabChange}
-          onTagFilter={handleTagFilter}
-          onMoodFilter={handleMoodFilter}
-          selectedTag={filterTag}
-          selectedMood={filterMood}
-        />
+        {/* Mobil Kenar Çubuğu Arka Planı (Karartma katmanı) */}
+        {isMobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          >
+          </div>
+        )}
+        
+        {/* Kenar Çubuğu - Masaüstünde normal görünüm, mobilde overlay */}
+        <div 
+          className={`
+            lg:w-64 lg:mr-0 
+            fixed lg:static inset-y-0 right-0 z-30 
+            transform ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
+            lg:translate-x-0 transition-transform duration-300 ease-in-out
+            lg:flex
+          `}
+        >
+          <div className="h-full w-64 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none">
+            <Sidebar 
+              fikirler={fikirler}
+              activeTab={activeTab} 
+              onTabChange={handleTabChange}
+              onTagFilter={handleTagFilter}
+              onMoodFilter={handleMoodFilter}
+              selectedTag={filterTag}
+              selectedMood={filterMood}
+              isMobile={true}
+              onMobileClose={() => setIsMobileSidebarOpen(false)}
+            />
+          </div>
+        </div>
         {/* İçerik */}
-        <main className="flex-1 flex justify-center items-start py-10 px-4">
+        <main className="flex-1 flex justify-center items-start py-10 px-4 lg:ml-0">
           {activeTab === 'stats' ? (
             <Stats fikirler={fikirler} />
           ) : (
