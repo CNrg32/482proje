@@ -12,6 +12,8 @@ export default function Home() {
   const [duzenleId, setDuzenleId] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [filterTag, setFilterTag] = useState<string | null>(null);
+  const [filterMood, setFilterMood] = useState<Fikir['mood'] | null>(null);
 
   // İlk açılışta localStorage'dan yükle
   useEffect(() => {
@@ -95,12 +97,88 @@ export default function Home() {
     setActiveTab(tab);
   };
 
+  // Etiket filtreleme
+  const handleTagFilter = (tag: string | null) => {
+    setFilterTag(tag);
+    setFilterMood(null); // Tek seferde bir filtre
+  };
+
+  // Ruh hali filtreleme
+  const handleMoodFilter = (mood: Fikir['mood'] | null) => {
+    setFilterMood(mood);
+    setFilterTag(null); // Tek seferde bir filtre
+  };
+
+  // Filtrelenmiş fikirleri al
+  const getFilteredIdeas = () => {
+    let filtered = fikirler;
+    
+    if (filterTag) {
+      filtered = filtered.filter(fikir => 
+        fikir.etiket && fikir.etiket.toLowerCase() === filterTag.toLowerCase()
+      );
+    }
+    
+    if (filterMood) {
+      filtered = filtered.filter(fikir => fikir.mood === filterMood);
+    }
+    
+    return filtered;
+  };
+
+  // Filtreleme başlığı göster
+  const renderFilterHeader = () => {
+    if (!filterTag && !filterMood) return null;
+    
+    const getMoodName = (mood: string) => {
+      switch (mood) {
+        case 'inspired': return 'İlham dolu';
+        case 'excited': return 'Heyecanlı';
+        case 'neutral': return 'Nötr';
+        case 'tired': return 'Yorgun';
+        default: return mood;
+      }
+    };
+    
+    return (
+      <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 flex justify-between items-center">
+        <span className="text-sm text-blue-800 dark:text-blue-200 flex items-center">
+          <span className="mr-2">🔍</span>
+          {filterTag && `"${filterTag}" etiketini içeren fikirler`}
+          {filterMood && `${getMoodName(filterMood)} ruh halindeki fikirler`}
+          <span className="ml-2 text-xs bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
+            {getFilteredIdeas().length} sonuç
+          </span>
+        </span>
+        <button
+          onClick={() => {
+            setFilterTag(null);
+            setFilterMood(null);
+          }}
+          className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 flex items-center"
+          aria-label="Filtreyi kaldır"
+        >
+          <span className="mr-1">✕</span>
+          Temizle
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 flex flex-col">
       <Navbar onThemeToggle={toggleTheme} isDarkMode={isDarkMode} />
       {/* Ana içerik alanı */}
       <div className="flex-1 flex">
-        <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
+        <Sidebar 
+          fikirler={fikirler}
+          activeTab={activeTab} 
+          onTabChange={handleTabChange}
+          onTagFilter={handleTagFilter}
+          onMoodFilter={handleMoodFilter}
+          selectedTag={filterTag}
+          selectedMood={filterMood}
+        />
         {/* İçerik */}
         <main className="flex-1 flex justify-center items-start py-10 px-4">
           {activeTab === 'stats' ? (
@@ -116,10 +194,13 @@ export default function Home() {
                     Kaydettiğiniz fikirleri görüntüleyin ve yönetin.
                   </p>
                   
+                  {renderFilterHeader()}
+                  
                   <IdeaList 
-                    fikirler={fikirler}
+                    fikirler={getFilteredIdeas()}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onTagClick={handleTagFilter}
                   />
                 </>
               )}

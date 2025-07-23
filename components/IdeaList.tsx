@@ -7,9 +7,10 @@ interface Props {
   fikirler: Fikir[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onTagClick?: (tag: string) => void;
 }
 
-const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
+const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete, onTagClick }) => {
   // Ruh haline göre emoji gösterilmesi
   const getMoodEmoji = (mood?: Fikir['mood']) => {
     switch (mood) {
@@ -50,21 +51,25 @@ const IdeaList: React.FC<Props> = ({ fikirler, onEdit, onDelete }) => {
             <span className="text-xl ml-2 flex-shrink-0">{getMoodEmoji(fikir.mood)}</span>
           </div>
           
-          <div className="flex justify-between items-center">
-            <div className="flex flex-wrap gap-1 items-center">
-              {fikir.etiket && (
-                <span className="inline-block px-2 py-1 text-xs font-medium
-                               bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 
-                               rounded-full">
-                  #{fikir.etiket}
-                </span>
-              )}
-              {fikir.timestamp && (
-                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                  {new Date(fikir.timestamp).toLocaleString('tr-TR')}
-                </span>
-              )}
-            </div>
+                      <div className="flex justify-between items-center">
+              <div className="flex flex-wrap gap-1 items-center">
+                {fikir.etiket && (
+                  <button
+                    onClick={() => onTagClick?.(fikir.etiket!)}
+                    className="inline-block px-2 py-1 text-xs font-medium
+                             bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 
+                             rounded-full hover:bg-blue-200 dark:hover:bg-blue-800
+                             transition-colors duration-200 cursor-pointer"
+                  >
+                    #{fikir.etiket}
+                  </button>
+                )}
+                {fikir.timestamp && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                    {new Date(fikir.timestamp).toLocaleString('tr-TR')}
+                  </span>
+                )}
+              </div>
             
             <div className="flex space-x-2">
               <button 
