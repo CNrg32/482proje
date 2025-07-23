@@ -1,68 +1,56 @@
-// components/InstallPrompt.tsx
+import { useState, useEffect } from 'react';
 
-import React from 'react';
-
-interface Props {
-  onInstall: () => void;
-  onDismiss: () => void;
-  isVisible: boolean;
+interface InstallPromptProps {
+  onClose: () => void;
 }
 
-const InstallPrompt: React.FC<Props> = ({ onInstall, onDismiss, isVisible }) => {
-  if (!isVisible) return null;
+const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
+  const [isIOS, setIsIOS] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
+
+  useEffect(() => {
+    // Tarayıcı ve işletim sistemi tespiti
+    const ua = window.navigator.userAgent;
+    const iOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+    const android = /Android/.test(ua);
+    
+    setIsIOS(iOS);
+    setIsAndroid(android);
+  }, []);
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 z-50 transform transition-all duration-300 ease-in-out">
-      <div className="flex items-start space-x-3">
-        <div className="flex-shrink-0">
-          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-            <svg 
-              className="w-6 h-6 text-blue-600 dark:text-blue-400" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" 
-              />
+    <div className="fixed bottom-0 left-0 right-0 p-4 bg-blue-600 text-white shadow-lg z-50 animate-slide-up">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center">
+          <div className="mr-3 bg-white p-1 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-blue-600">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
           </div>
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
-            IdeaPulse'u Yükle
-          </h3>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
-            Uygulamayı ana ekranınıza ekleyerek daha hızlı erişim sağlayın. Offline da çalışır!
-          </p>
-          
-          <div className="flex space-x-2">
-            <button
-              onClick={onInstall}
-              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-200"
-            >
-              Yükle
-            </button>
-            <button
-              onClick={onDismiss}
-              className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-200"
-            >
-              Şimdi Değil
-            </button>
+          <div className="flex-1">
+            <h3 className="font-medium text-base">Ana Ekrana Ekle</h3>
+            {isIOS ? (
+              <p className="text-sm mt-1 text-blue-100">
+                Safari tarayıcısında, alt menüden "Ana Ekrana Ekle" seçeneğine dokunun.
+              </p>
+            ) : isAndroid ? (
+              <p className="text-sm mt-1 text-blue-100">
+                Tarayıcı menüsüne dokunun ve "Ana ekrana ekle" seçeneğini seçin.
+              </p>
+            ) : (
+              <p className="text-sm mt-1 text-blue-100">
+                Bu uygulamayı cihazınıza kurmak için tarayıcınızın yükleme seçeneğini kullanın.
+              </p>
+            )}
           </div>
         </div>
-        
         <button 
-          onClick={onDismiss}
-          className="flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded-full p-1 transition-colors duration-200"
+          onClick={onClose} 
+          className="ml-4 text-white p-1 rounded hover:bg-blue-700 focus:outline-none"
           aria-label="Kapat"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
           </svg>
         </button>
       </div>

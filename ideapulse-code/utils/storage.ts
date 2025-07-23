@@ -1,104 +1,57 @@
 // utils/storage.ts
 
-import { Fikir } from '@/types/idea';
+import { Idea } from '@/types/idea'
 
-const LOCAL_KEY = 'fikirler';
+const STORAGE_KEY = 'ideapulse_ideas'
+const THEME_KEY = 'ideapulse_theme'
 
-export const saveIdeasToStorage = (fikirler: Fikir[]) => {
+export const saveIdeasToStorage = (ideas: Idea[]) => {
   try {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(fikirler));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
   } catch (error) {
     console.error('Fikirler kaydedilirken hata oluştu:', error);
   }
-};
+}
 
-export const getIdeasFromStorage = (): Fikir[] => {
+export const getIdeasFromStorage = (): Idea[] => {
   try {
     if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem(LOCAL_KEY);
-    if (!stored) return [];
-    
-    const ideas = JSON.parse(stored);
-          // Backward compatibility: eski fikirlere ID, mood, timestamp ve çoklu etiketler ekle
-      return ideas.map((idea: any) => {
-        const updatedIdea = {
-          ...idea,
-          id: idea.id || generateUniqueId(), // ID yoksa oluştur
-          mood: idea.mood || 'neutral',
-          timestamp: idea.timestamp || new Date().toISOString()
-        };
-
-        // Çoklu etiket sistemi migration
-        if (!updatedIdea.etiketler && updatedIdea.etiket) {
-          // Tek etiket varsa, etiketler array'ine çevir
-          updatedIdea.etiketler = [updatedIdea.etiket];
-        }
-
-        return updatedIdea;
-      });
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
   } catch (error) {
     console.error('Fikirler yüklenirken hata oluştu:', error);
     return [];
   }
-};
+}
 
-// Unique ID generator (basit UUID benzeri)
-const generateUniqueId = (): string => {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-};
-
-// Varsayılan fikirler
-export const getDefaultIdeas = (): Fikir[] => [
-  {
-    id: generateUniqueId(),
-    metin: '482 dersini AA geçmek',
-    etiket: 'okul',
-    mood: 'excited',
-    timestamp: new Date().toISOString()
-  },
-  {
-    id: generateUniqueId(),
-    metin: 'Proje Ödevini yapmak',
-    etiket: 'ödev',
-    mood: 'neutral',
-    timestamp: new Date().toISOString()
-  },
-  {
-    id: generateUniqueId(),
-    metin: 'Ekip içi dağılımı planlamak',
-    etiket: 'takım',
-    mood: 'inspired',
-    timestamp: new Date().toISOString()
+export const saveThemeToStorage = (isDark: boolean) => {
+  try {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+  } catch (error) {
+    console.error('Tema kaydedilirken hata oluştu:', error);
   }
-];
+}
 
-// PWA Utility Functions
-export const isOnline = (): boolean => {
-  if (typeof window === 'undefined') return true;
-  return navigator.onLine;
-};
+export const getThemeFromStorage = (): 'dark' | 'light' | null => {
+  try {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(THEME_KEY) as 'dark' | 'light' | null;
+  } catch (error) {
+    console.error('Tema yüklenirken hata oluştu:', error);
+    return null;
+  }
+}
 
-export const isPWA = (): boolean => {
+// PWA yükleme durumunu kontrol et
+export const checkIsAppInstalled = (): boolean => {
   if (typeof window === 'undefined') return false;
-  
-  // Check if running as PWA
-  const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-  const isIOSPWA = (window.navigator as any).standalone === true;
-  
-  return isStandalone || isIOSPWA;
-};
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         ('standalone' in window.navigator && (window.navigator as any).standalone === true);
+}
 
-export const getInstallationStatus = (): 'installed' | 'installable' | 'not-supported' => {
-  if (typeof window === 'undefined') return 'not-supported';
-  
-  if (isPWA()) {
-    return 'installed';
-  }
-  
-  if ('serviceWorker' in navigator && 'BeforeInstallPromptEvent' in window) {
-    return 'installable';
-  }
-  
-  return 'not-supported';
-}; 
+// IndexedDB'yi kontrol et (daha büyük veri depolama için)
+export const isIndexedDBSupported = (): boolean => {
+  return typeof window !== 'undefined' && 'indexedDB' in window;
+}

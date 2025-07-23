@@ -1,33 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Fikir } from '@/types/idea';
-import { saveIdeasToStorage, getIdeasFromStorage, getDefaultIdeas } from '@/utils/storage';
+// pages/index.tsx
+
+import { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { Idea } from '@/types/idea';
+import { saveIdeasToStorage, getIdeasFromStorage } from '@/utils/storage';
 import Navbar from '@/components/Navbar';
-import Sidebar from '@/components/Sidebar';
+import Footer from '@/components/Footer';
 import IdeaInput from '@/components/IdeaInput';
 import IdeaList from '@/components/IdeaList';
 import Stats from '@/components/Stats';
-import InstallPromptManager from '@/components/InstallPromptManager';
+import Sidebar from '@/components/Sidebar';
+import { v4 as uuidv4 } from 'uuid';
+import { getDeleteIdeaSingleton, getDeleteAllIdeasSingleton } from '@/utils/ideaFactory';
 
 export default function Home() {
-  const [fikirler, setFikirler] = useState<Fikir[]>([]);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string | null>(null);
-  const [filterMood, setFilterMood] = useState<Fikir['mood'] | null>(null);
+  const [filterMood, setFilterMood] = useState<Idea['mood'] | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<string>('all');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
-  // İlk açılışta localStorage'dan yükle
+  // Tema ve verileri yükle
   useEffect(() => {
-    const storedIdeas = getIdeasFromStorage();
-    if (storedIdeas.length > 0) {
-      setFikirler(storedIdeas);
-    } else {
-      setFikirler(getDefaultIdeas());
-    }
-  }, []);
-
-  // Tema kontrolü
-  useEffect(() => {
+    // Dark mode tercihini kontrol et
     if (typeof window !== 'undefined') {
       const userPrefersDark = window.matchMedia && 
         window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -37,21 +34,25 @@ export default function Home() {
         setIsDarkMode(true);
         document.documentElement.classList.add('dark');
       }
+
+      // Çevrimiçi/çevrimdışı durumunu izle (PWA için)
+      const handleOnlineStatus = () => setIsOnline(navigator.onLine);
+      window.addEventListener('online', handleOnlineStatus);
+      window.addEventListener('offline', handleOnlineStatus);
+      setIsOnline(navigator.onLine);
+
+      // Temizleme işlevi
+      return () => {
+        window.removeEventListener('online', handleOnlineStatus);
+        window.removeEventListener('offline', handleOnlineStatus);
+      };
     }
   }, []);
 
-  // PWA Service Worker Registration
+  // Fikirleri yükle
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('[PWA] Service Worker registered:', registration);
-        })
-        .catch((error) => {
-          console.error('[PWA] Service Worker registration failed:', error);
-        });
-    }
+    const storedIdeas = getIdeasFromStorage();
+    setIdeas(storedIdeas);
   }, []);
 
   // Dark mode değişimini takip et
@@ -65,94 +66,71 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // ESC tuşu ile mobil sidebar'ı kapat ve body scroll'u kontrol et
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isMobileSidebarOpen) {
-        setIsMobileSidebarOpen(false);
-      }
-    };
-
-    // Mobil sidebar açıkken body scroll'u engelle
-    if (isMobileSidebarOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    document.addEventListener('keydown', handleEscape);
-    
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset'; // Cleanup
-    };
-  }, [isMobileSidebarOpen]);
-
-  // Fikirler değiştikçe localStorage'a kaydet
-  useEffect(() => {
-    if (fikirler.length > 0) {
-      saveIdeasToStorage(fikirler);
-    }
-  }, [fikirler]);
-
-  const handleSubmit = (fikir: Fikir) => {
-    // Yeni fikir ekle (artık düzenleme in-place yapılıyor)
-    setFikirler([fikir, ...fikirler]);
-    setActiveTab('all'); // Ekleme sonrası listeye dön
-  };
-
-  const handleDelete = (id: string) => {
-    setFikirler(fikirler.filter(f => f.id !== id));
-  };
-
-  const handleEdit = (updatedFikir: Fikir) => {
-    // In-place editing ile direkt güncelle
-    const updated = fikirler.map(f => 
-      f.id === updatedFikir.id ? updatedFikir : f
-    );
-    setFikirler(updated);
-  };
-
   const toggleTheme = () => {
     setIsDarkMode(prev => !prev);
   };
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setIsMobileSidebarOpen(false); // Mobil menüyü kapat
+  // Yeni fikir ekle
+  const handleNewIdea = (idea: Idea) => {
+    // ID yoksa ekle (IdeaInput'tan gelen veriye ID ekleme olasılığına karşı)
+    const finalIdea = {
+      ...idea,
+      id: idea.id || uuidv4()
+    };
+    
+    const updated = [finalIdea, ...ideas];
+    setIdeas(updated);
+    saveIdeasToStorage(updated);
+    
+    // Fikir ekledikten sonra tüm fikirleri gösteren sekmeye geç
+    setActiveTab('all');
   };
 
+  // Fikir düzenle
+  const handleEditIdea = (updatedIdea: Idea) => {
+    const updated = ideas.map(idea => 
+      idea.id === updatedIdea.id ? updatedIdea : idea
+    );
+    setIdeas(updated);
+    saveIdeasToStorage(updated);
+  };
+
+  // Fikir sil fonksiyonunu singleton olarak al
+  const handleDeleteIdea = getDeleteIdeaSingleton({ setIdeas, saveIdeasToStorage });
+
+  // Tüm fikirleri sil fonksiyonunu singleton olarak al
+  const handleDeleteAllIdeas = getDeleteAllIdeasSingleton({ setIdeas, saveIdeasToStorage });
+
   // Etiket filtreleme
-  const handleTagFilter = (tag: string | null) => {
+  const handleTagClick = (tag: string) => {
     setFilterTag(tag);
-    setFilterMood(null); // Tek seferde bir filtre
+    setFilterMood(null);
   };
 
   // Ruh hali filtreleme
-  const handleMoodFilter = (mood: Fikir['mood'] | null) => {
+  const handleMoodFilter = (mood: Idea['mood'] | null) => {
     setFilterMood(mood);
-    setFilterTag(null); // Tek seferde bir filtre
+    setFilterTag(null);
+  };
+
+  // Sekme değiştirme
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setIsMobileSidebarOpen(false);
   };
 
   // Filtrelenmiş fikirleri al
   const getFilteredIdeas = () => {
-    let filtered = fikirler;
+    let filtered = ideas;
     
     if (filterTag) {
-      filtered = filtered.filter(fikir => {
-        // Çoklu etiketleri kontrol et
-        if (fikir.etiketler && fikir.etiketler.length > 0) {
-          return fikir.etiketler.some(tag => 
-            tag.toLowerCase() === filterTag.toLowerCase()
-          );
-        }
-        // Backward compatibility: tek etiket sistemi
-        return fikir.etiket && fikir.etiket.toLowerCase() === filterTag.toLowerCase();
-      });
+      filtered = filtered.filter(idea => 
+        idea.tags.some(tag => tag.toLowerCase() === filterTag.toLowerCase())
+      );
     }
     
     if (filterMood) {
-      filtered = filtered.filter(fikir => fikir.mood === filterMood);
+      filtered = filtered.filter(idea => idea.mood === filterMood);
     }
     
     return filtered;
@@ -162,149 +140,153 @@ export default function Home() {
   const renderFilterHeader = () => {
     if (!filterTag && !filterMood) return null;
     
-    const getMoodName = (mood: string) => {
-      switch (mood) {
-        case 'inspired': return 'İlham dolu';
-        case 'excited': return 'Heyecanlı';
-        case 'neutral': return 'Nötr';
-        case 'tired': return 'Yorgun';
-        default: return mood;
-      }
-    };
-    
     return (
-      <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 flex justify-between items-center">
-        <span className="text-sm text-blue-800 dark:text-blue-200 flex items-center">
-          <span className="mr-2">🔍</span>
+      <div className="mb-4 p-2 rounded-md bg-blue-50 dark:bg-blue-900/30 flex justify-between items-center">
+        <span className="text-sm text-gray-600 dark:text-gray-300">
           {filterTag && `"${filterTag}" etiketini içeren fikirler`}
-          {filterMood && `${getMoodName(filterMood)} ruh halindeki fikirler`}
-          <span className="ml-2 text-xs bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
-            {getFilteredIdeas().length} sonuç
-          </span>
+          {filterMood && `${
+            filterMood === 'inspired' ? 'İlham dolu' : 
+            filterMood === 'excited' ? 'Heyecanlı' : 
+            filterMood === 'neutral' ? 'Nötr' : 'Yorgun'
+          } ruh halindeki fikirler`}
         </span>
         <button
           onClick={() => {
             setFilterTag(null);
             setFilterMood(null);
           }}
-          className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 flex items-center"
+          className="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
           aria-label="Filtreyi kaldır"
         >
-          <span className="mr-1">✕</span>
-          Temizle
+          Filtreyi Kaldır
         </button>
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200 flex flex-col">
-      <Navbar onThemeToggle={toggleTheme} isDarkMode={isDarkMode} />
-      
-      {/* Mobil menü butonu */}
-      <div className="lg:hidden fixed bottom-4 right-4 z-50">
-        <button 
-          onClick={() => setIsMobileSidebarOpen(prev => !prev)}
-          className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
-          aria-label={isMobileSidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
-        >
-          {isMobileSidebarOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          )}
-        </button>
-      </div>
-      
-      {/* Ana içerik alanı */}
-      <div className="flex-1 flex">
-        {/* Mobil Kenar Çubuğu Arka Planı (Karartma katmanı) */}
-        {isMobileSidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-            onClick={() => setIsMobileSidebarOpen(false)}
-          >
+    <>
+      <Head>
+        <title>IdeaPulse - Fikirlerinizi Kaydedin</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+      </Head>
+
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
+        <Navbar onThemeToggle={toggleTheme} isDarkMode={isDarkMode} />
+        
+        {!isOnline && (
+          <div className="fixed top-16 inset-x-0 z-50 bg-yellow-500 text-yellow-900 text-center py-2 text-sm">
+            Çevrimdışı moddasınız. Değişiklikleriniz cihazınıza kaydedilecek.
           </div>
         )}
         
-        {/* Kenar Çubuğu - Masaüstünde normal görünüm, mobilde overlay */}
-        <div 
-          className={`
-            lg:w-64 lg:mr-0 
-            fixed lg:static inset-y-0 right-0 z-30 
-            transform ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
-            lg:translate-x-0 transition-transform duration-300 ease-in-out
-            lg:flex
-          `}
-        >
-          <div className="h-full w-64 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none">
-            <Sidebar 
-              fikirler={fikirler}
-              activeTab={activeTab} 
-              onTabChange={handleTabChange}
-              onTagFilter={handleTagFilter}
-              onMoodFilter={handleMoodFilter}
-              selectedTag={filterTag}
-              selectedMood={filterMood}
-              isMobile={true}
-              onMobileClose={() => setIsMobileSidebarOpen(false)}
-            />
-          </div>
+        {/* Mobil menü butonu */}
+        <div className="lg:hidden fixed bottom-4 right-4 z-40">
+          <button 
+            onClick={() => setIsMobileSidebarOpen(prev => !prev)}
+            className="bg-blue-600 text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+            aria-label={isMobileSidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
+          >
+            {isMobileSidebarOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            )}
+          </button>
         </div>
-        {/* İçerik */}
-        <main className="flex-1 flex justify-center items-start py-10 px-4 lg:ml-0">
-          {activeTab === 'stats' ? (
-            <Stats fikirler={fikirler} />
-          ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md transition-colors duration-200">
-              {activeTab === 'all' && (
-                <>
-                  <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
-                    Fikirleriniz
-                  </h1>
-                  <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
-                    Kaydettiğiniz fikirleri görüntüleyin ve yönetin.
-                  </p>
-                  
-                  {renderFilterHeader()}
-                  
-                  <IdeaList 
-                    fikirler={getFilteredIdeas()}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onTagClick={handleTagFilter}
-                  />
-                </>
+        
+        <div className="pt-16 pb-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row">
+              {/* Mobil Kenar Çubuğu Arka Planı (Karartma katmanı) */}
+              {isMobileSidebarOpen && (
+                <div 
+                  className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                >
+                </div>
               )}
               
-              {activeTab === 'add' && (
-                <>
-                  <h1 className="text-2xl font-bold text-center mb-2 text-gray-800 dark:text-gray-100">
-                    Yeni Fikir
-                  </h1>
-                  <p className="text-center mb-6 text-gray-600 dark:text-gray-400">
-                    Yeni bir fikir ekleyin veya mevcut fikri düzenleyin.
-                  </p>
-                  
-                  <IdeaInput 
-                    onSubmit={handleSubmit}
-                    editingFikir={null} // Artık in-place editing kullanıyoruz
-                    editingIndex={null} // Legacy prop
-                    onCancelEdit={() => {}} // No-op function
+              {/* Kenar Çubuğu - Masaüstünde normal görünüm, mobilde overlay */}
+              <div 
+                className={`
+                  lg:w-64 lg:mr-8 
+                  fixed lg:static inset-y-0 right-0 z-30 
+                  transform ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
+                  lg:translate-x-0 transition-transform duration-300 ease-in-out
+                  lg:flex mt-8 lg:mt-0
+                `}
+              >
+                <div className="h-full lg:sticky lg:top-20 w-64 py-8 px-4 lg:py-0 lg:px-0 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none">
+                  <Sidebar 
+                    ideas={ideas} 
+                    activeTab={activeTab}
+                    onTabChange={handleTabChange}
+                    onTagFilter={setFilterTag}
+                    onMoodFilter={handleMoodFilter}
+                    selectedTag={filterTag}
+                    selectedMood={filterMood}
                   />
-                </>
-              )}
+                </div>
+              </div>
+              
+              {/* Ana İçerik */}
+              <main className="flex-1 mt-8">
+                {/* İçerik Alanı */}
+                <div className="space-y-6">
+                  {activeTab === 'all' && (
+                    <>
+                      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Fikirlerim</h1>
+                          {ideas.length > 0 && (
+                            <button
+                              onClick={handleDeleteAllIdeas}
+                              className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors font-semibold text-sm shadow focus:outline-none focus:ring-2 focus:ring-red-400"
+                            >
+                              Tümünü Sil
+                            </button>
+                          )}
+                        </div>
+                        
+                        {renderFilterHeader()}
+                        
+                        <div className="mt-6">
+                          <IdeaList 
+                            ideas={getFilteredIdeas()} 
+                            onDelete={handleDeleteIdea}
+                            onEdit={handleEditIdea}
+                            onTagClick={handleTagClick}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {activeTab === 'add' && (
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                      <h1 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-100">Yeni Fikir Ekle</h1>
+                      <div className="mt-4">
+                        <IdeaInput onSubmit={handleNewIdea} />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {activeTab === 'stats' && (
+                    <Stats ideas={ideas} />
+                  )}
+                </div>
+              </main>
             </div>
-          )}
-        </main>
+          </div>
+        </div>
+        
+        <Footer />
       </div>
-      
-      {/* PWA Install Prompt */}
-      <InstallPromptManager />
-    </div>
+    </>
   );
-} 
+}

@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,4 +34,48 @@ a, button {
 
 input, textarea, select, button {
   font-size: 16px; /* iOS zooming sorununu engeller */
-} 
+}
+
+/* PWA için çekme yenileme animasyonu */
+@keyframes loadingSpinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ana ekrana ekle yönlendirmesi için animasyon */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.pwa-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(var(--foreground-rgb), 0.2);
+  border-top-color: rgb(var(--foreground-rgb));
+  border-radius: 50%;
+  animation: loadingSpinner 0.8s linear infinite;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors focus:ring focus:ring-blue-300 focus:outline-none active:bg-blue-800;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition-colors focus:ring focus:ring-gray-400 focus:outline-none active:bg-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
+  }
+  
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 dark:border dark:border-gray-700;
+  }
+
+  .tag {
+    @apply inline-block bg-gray-100 rounded-full px-2 py-1 text-xs text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-blue-900;
+  }
+}

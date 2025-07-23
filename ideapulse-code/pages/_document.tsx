@@ -4,33 +4,33 @@ export default function Document() {
   return (
     <Html lang="tr">
       <Head>
-        {/* PWA Primary Meta Tags */}
-        <meta name="application-name" content="IdeaPulse" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="IdeaPulse" />
-        <meta name="description" content="Fikirlerinizi kolayca organize edin ve yönetin" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#2563eb" />
-        <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#2563eb" />
-
-        {/* PWA Manifest */}
+        <meta charSet="utf-8" />
+        <meta name="description" content="IdeaPulse - Fikirlerinizi kaydedin ve organize edin" />
+        <meta name="theme-color" content="#0284c7" />
+        
         <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="icon" href="/favicon.ico" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="IdeaPulse" />
+        <meta property="og:description" content="Fikirlerinizi kaydedin ve organize edin" />
+        <meta property="og:image" content="/icons/og-image.png" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="IdeaPulse" />
+        <meta name="twitter:description" content="Fikirlerinizi kaydedin ve organize edin" />
+        <meta name="twitter:image" content="/icons/og-image.png" />
 
-        {/* PWA Icons */}
-        <link rel="apple-touch-icon" href="/icon-192.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/icon-192.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icon-192.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/icon-192.png" />
-
-        {/* PWA Splash Screens */}
-        <link rel="apple-touch-startup-image" href="/icon-512.png" />
-
-        {/* PWA Additional Meta */}
-        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover" />
+        {/* Google Fonts - Inter */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" 
+          rel="stylesheet" 
+        />
       </Head>
       <body>
         <Main />

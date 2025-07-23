@@ -1,58 +1,39 @@
-// components/Sidebar.tsx
-
 import React from 'react';
+import { Idea } from '@/types/idea';
 
 interface Props {
-  fikirler: any[];
+  ideas: Idea[];
   activeTab: string;
   onTabChange: (tab: string) => void;
   onTagFilter: (tag: string | null) => void;
-  onMoodFilter: (mood: any | null) => void;
+  onMoodFilter: (mood: Idea['mood'] | null) => void;
   selectedTag: string | null;
-  selectedMood: any | null;
-  isMobile?: boolean;
-  onMobileClose?: () => void;
+  selectedMood: Idea['mood'] | null;
 }
 
-const Sidebar: React.FC<Props> = ({ 
-  fikirler, 
-  activeTab, 
+const Sidebar: React.FC<Props> = ({
+  ideas,
+  activeTab,
   onTabChange,
   onTagFilter,
   onMoodFilter,
   selectedTag,
-  selectedMood,
-  isMobile,
-  onMobileClose
+  selectedMood
 }) => {
-  const menuItems = [
-    { id: 'all', label: 'Fikirler', icon: '📝' },
-    { id: 'add', label: 'Yeni Fikir', icon: '➕' },
-    { id: 'stats', label: 'İstatistikler', icon: '📊' }
-  ];
-
-    // Tüm etiketleri topla ve sayılarını bul
+  // Tüm etiketleri topla ve sayılarını bul
   const getTagsWithCount = () => {
     const tagCount: Record<string, number> = {};
-
-    fikirler.forEach(fikir => {
-      // Çoklu etiketleri kontrol et
-      if (fikir.etiketler && fikir.etiketler.length > 0) {
-        fikir.etiketler.forEach(tag => {
-          if (tag.trim()) {
-            tagCount[tag] = (tagCount[tag] || 0) + 1;
-          }
-        });
-      } 
-      // Fallback: tek etiket sistemi (backward compatibility)
-      else if (fikir.etiket && fikir.etiket.trim()) {
-        tagCount[fikir.etiket] = (tagCount[fikir.etiket] || 0) + 1;
-      }
+    
+    ideas.forEach(idea => {
+      idea.tags.forEach(tag => {
+        if (tag) {
+          tagCount[tag] = (tagCount[tag] || 0) + 1;
+        }
+      });
     });
-
+    
     return Object.entries(tagCount)
-      .sort((a, b) => b[1] - a[1]) // Sık kullanılana göre sırala
-      .slice(0, 8); // En fazla 8 etiket
+      .sort((a, b) => b[1] - a[1]); // Sık kullanılana göre sırala
   };
 
   // Ruh hallerini sayılarıyla topla
@@ -64,9 +45,8 @@ const Sidebar: React.FC<Props> = ({
       tired: 0
     };
     
-    fikirler.forEach(fikir => {
-      const mood = fikir.mood || 'neutral';
-      moodCount[mood] = (moodCount[mood] || 0) + 1;
+    ideas.forEach(idea => {
+      moodCount[idea.mood] = (moodCount[idea.mood] || 0) + 1;
     });
     
     return Object.entries(moodCount)
@@ -81,131 +61,117 @@ const Sidebar: React.FC<Props> = ({
     neutral: '😐',
     tired: '😴'
   };
-
-  // Ruh hali adlarını Türkçe'ye çevir
-  const getMoodName = (mood: string) => {
-    switch (mood) {
-      case 'inspired': return 'İlham dolu';
-      case 'excited': return 'Heyecanlı';
-      case 'neutral': return 'Nötr';
-      case 'tired': return 'Yorgun';
-      default: return mood;
-    }
-  };
   
-  const tagsToShow = getTagsWithCount();
+  // Görüntülenecek etiketler
+  const tagsToShow = getTagsWithCount().slice(0, 10); // En fazla 10 etiket
   const moodsToShow = getMoodsWithCount();
 
   return (
-    <aside className="w-full h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 lg:border-r-0 overflow-y-auto">
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">
-            Menü
-          </h2>
-          {isMobile && onMobileClose && (
-            <button
-              onClick={onMobileClose}
-              className="lg:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Menüyü kapat"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Fikirlerinizi yönetin
-        </p>
+    <aside className="w-64 bg-white dark:bg-gray-800 shadow-md p-4 h-full overflow-y-auto flex-shrink-0 rounded-lg">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-3 text-gray-800 dark:text-gray-100">IdeaPulse</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Fikirlerinizi düzenleyin</p>
       </div>
       
-      <nav className="px-3">
+      <nav className="mb-6">
         <ul className="space-y-1">
-          {menuItems.map((item) => (
-            <li key={item.id}>
-              <button
-                onClick={() => onTabChange(item.id)}
-                className={`w-full text-left px-3 py-2 rounded-md transition-colors flex items-center ${
-                  activeTab === item.id
-                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.label}
-              </button>
-            </li>
-          ))}
+          <li>
+            <button
+              onClick={() => onTabChange('all')}
+              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                activeTab === 'all' 
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              📝 Tüm Fikirler
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => onTabChange('add')}
+              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                activeTab === 'add' 
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              ➕ Yeni Fikir Ekle
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => onTabChange('stats')}
+              className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                activeTab === 'stats' 
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              📊 İstatistikler
+            </button>
+          </li>
         </ul>
       </nav>
       
-      {fikirler.length > 0 && (
+      {ideas.length > 0 && (
         <>
-          {/* Etiketler Bölümü */}
-          {tagsToShow.length > 0 && (
-            <div className="mb-6">
-              <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3 text-sm uppercase tracking-wider">
-                🏷️ Etiketler
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {tagsToShow.map(([tag, count]) => (
-                  <button
-                    key={tag}
-                    onClick={() => onTagFilter(selectedTag === tag ? null : tag)}
-                    className={`text-xs rounded-full py-1 px-3 transition-all duration-200 ${
-                      selectedTag === tag
-                        ? 'bg-blue-500 text-white shadow-md'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-800 dark:hover:text-blue-200'
-                    }`}
-                  >
-                    #{tag}
-                    <span className="ml-1 opacity-75">({count})</span>
-                  </button>
-                ))}
-              </div>
+          <div className="mb-6">
+            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2 text-sm uppercase tracking-wider">
+              Etiketler
+            </h3>
+            <div className="flex flex-wrap gap-1">
+              {tagsToShow.map(([tag, count]) => (
+                <button
+                  key={tag}
+                  onClick={() => onTagFilter(selectedTag === tag ? null : tag)}
+                  className={`text-xs rounded-full py-1 px-2 whitespace-nowrap ${
+                    selectedTag === tag
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  #{tag} <span className="opacity-70">({count})</span>
+                </button>
+              ))}
               {selectedTag && (
                 <button
                   onClick={() => onTagFilter(null)}
-                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 mt-2 block"
+                  className="text-xs text-red-600 hover:text-red-800"
                 >
-                  ✕ Filtreyi temizle
+                  Filtreyi Temizle
                 </button>
               )}
             </div>
-          )}
+          </div>
           
-          {/* Ruh Hali Bölümü */}
           <div className="mb-6">
-            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-3 text-sm uppercase tracking-wider">
-              🎭 Ruh Hali
+            <h3 className="font-medium text-gray-700 dark:text-gray-300 mb-2 text-sm uppercase tracking-wider">
+              Ruh Hali
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {moodsToShow.map(([mood, count]) => (
                 <button
                   key={mood}
-                  onClick={() => onMoodFilter(selectedMood === mood ? null : mood)}
-                  className={`block w-full text-left rounded-lg py-2 px-3 text-sm transition-all duration-200 ${
+                  onClick={() => onMoodFilter(selectedMood === mood as Idea['mood'] ? null : mood as Idea['mood'])}
+                  className={`block w-full text-left rounded-md py-1 px-2 text-sm ${
                     selectedMood === mood
-                      ? 'bg-purple-500 text-white shadow-md'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      ? 'bg-blue-500 text-white'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <span className="mr-2">{moodEmojis[mood]}</span>
-                      <span>{getMoodName(mood)}</span>
-                    </div>
-                    <span className="text-xs opacity-75">({count})</span>
-                  </div>
+                  {moodEmojis[mood]} {mood === 'inspired' ? 'İlham dolu' : 
+                    mood === 'excited' ? 'Heyecanlı' :
+                    mood === 'neutral' ? 'Nötr' : 'Yorgun'} 
+                  <span className="opacity-70 ml-1">({count})</span>
                 </button>
               ))}
               {selectedMood && (
                 <button
                   onClick={() => onMoodFilter(null)}
-                  className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 mt-2 block"
+                  className="text-xs text-red-600 hover:text-red-800"
                 >
-                  ✕ Filtreyi temizle
+                  Filtreyi Temizle
                 </button>
               )}
             </div>
@@ -215,14 +181,8 @@ const Sidebar: React.FC<Props> = ({
       
       <div className="border-t pt-4 dark:border-gray-700">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Toplam: {fikirler.length} fikir
+          Toplam: {ideas.length} fikir
         </p>
-        {(selectedTag || selectedMood) && (
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-            {selectedTag && `Etiket: #${selectedTag}`}
-            {selectedMood && `Ruh hali: ${getMoodName(selectedMood)}`}
-          </p>
-        )}
       </div>
     </aside>
   );
